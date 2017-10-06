@@ -24,6 +24,7 @@
 #define LIB_I2CDEV_H
 
 #include <linux/types.h>
+#include <stddef.h>
 #include <sys/ioctl.h>
 
 #if defined(__STRICT_ANSI__) || !defined(__GNUC__)
