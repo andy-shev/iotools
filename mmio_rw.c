@@ -29,6 +29,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 #include "commands.h"
 
 struct mmap_info {
@@ -275,12 +276,127 @@ mmio_dump(int argc, const char *argv[], const struct cmd_info *info)
 	return 0;
 }
 
+/* Handle (unlikely) partial reads on an open file descriptor, failing on the
+ * first read error. To avoid error, @bytes_left must not exceed the number of
+ * bytes remaining before EOF. */
+static int do_load(void *buf, int fd, size_t bytes)
+{
+	size_t bytes_read = 0;
+	int rc;
+
+	while (bytes_read < bytes) {
+		rc = read(fd, buf + bytes_read, bytes - bytes_read);
+		if (rc < 0) {
+			fprintf(stderr, "read(%d): %s\n", fd, strerror(-rc));
+			return -1;
+		}
+		bytes_read += rc;
+	}
+
+	return 0;
+}
+
+static int
+mmio_load(int argc, const char *argv[], const struct cmd_info *info)
+{
+	off_t bytes_left;
+	struct mmap_info map;
+	uint64_t desired_addr;
+	uint64_t current_addr;
+	const struct mmap_file_flags *mmf = info->privdata;
+	struct stat bin_stat;
+	char *bin_path;
+	int bin_fd;
+	size_t pgsize = getpagesize();
+	int flags = O_RDWR | mmf->flags;
+	int load_pass;
+	int rc = 0;
+
+	desired_addr = strtoull(argv[1], NULL, 0);
+
+	/* Resolve any symlinks to the absolute path of the target. */
+	bin_path = realpath(argv[2], NULL);
+	if (bin_path == NULL) {
+		fprintf(stderr, "realpath(%s): %s\n", argv[2], strerror(errno));
+		return -1;
+	}
+
+	/* Open the flat file. */
+	bin_fd = open(bin_path, O_RDONLY);
+	free(bin_path);
+	if (bin_fd < 0) {
+		fprintf(stderr, "open(%s): %s\n", argv[2], strerror(-bin_fd));
+		return -1;
+	}
+
+	/* Get file stats, particularly the file size. */
+	if (fstat(bin_fd, &bin_stat) < 0) {
+		fprintf(stderr, "stat(%s): %s\n", argv[2], strerror(errno));
+		rc = -1;
+		goto have_file;
+	}
+
+	if (!S_ISREG(bin_stat.st_mode)) {
+		fprintf(stderr, "not a regular file\n");
+		rc = -1;
+		goto have_file;
+	}
+
+	/* Load data using a two-pass process:
+	 * 1. Perform a dry run making sure that all pages can be mapped.
+	 * 2. Load data from the file into the mappings. */
+	bytes_left = bin_stat.st_size;
+	for (load_pass = 0; load_pass < 2; load_pass++) {
+		unsigned long load_bytes;
+
+		bytes_left = bin_stat.st_size;
+		current_addr = desired_addr;
+
+		while (bytes_left && rc == 0) {
+			/* Load one page at a time, unless there's less than a
+			 * page remaining. This is just a reasonable amount of
+			 * data to map/move at once; it doesn't have anything to
+			 * do with access alignment. */
+			if (bytes_left < pgsize)
+				load_bytes = bytes_left;
+			else
+				load_bytes = pgsize;
+
+			/* We use an intermediate variable to keep track of the
+			 * current address because open_mapping() adjusts .addr
+			 * to be page aligned. */
+			map.addr = current_addr;
+			if (open_mapping(&map, flags, load_bytes) < 0) {
+				rc = -1;
+				goto have_file;
+			}
+
+			if (load_pass)
+				/* The mapping is always page aligned */
+				rc = do_load((void *)(map.mem + map.off),
+					     bin_fd, load_bytes);
+
+			close_mapping(&map);
+
+			/* Keep track of statistics. */
+			bytes_left -= load_bytes;
+			current_addr += load_bytes;
+		}
+	}
+
+have_file:
+	close(bin_fd);
+
+	return rc;
+}
+
 static struct mmap_file_flags cacheable_access = {};
 static struct mmap_file_flags uncacheable_access = { O_SYNC };
 
 MAKE_PREREQ_PARAMS_FIXED_ARGS(rd_params, 2, "<addr>", 0);
 MAKE_PREREQ_PARAMS_FIXED_ARGS(wr_params, 3, "<addr> <value>", 0);
 MAKE_PREREQ_PARAMS_VAR_ARGS(dump_params, 3, 4, "<addr> <num_bytes> [-b]", 0);
+MAKE_PREREQ_PARAMS_FIXED_ARGS(load_params, 3, "<addr> <file>", 0);
 
 #define MAKE_MMIO_READ_CMD(prefix_, size_, access_) \
 	MAKE_CMD_WITH_PARAMS_SIZE(prefix_ ## _read ##size_, &mmio_read_x, \
@@ -303,7 +419,9 @@ static const struct cmd_info mmio_cmds[] = {
 	MAKE_UC_MMIO_RW_CMD_PAIR(32),
 	MAKE_UC_MMIO_RW_CMD_PAIR(64),
 	MAKE_CMD_WITH_PARAMS(mmio_dump, &mmio_dump, &uncacheable_access,
-	                     &dump_params)
+	                     &dump_params),
+	MAKE_CMD_WITH_PARAMS(mmio_load, &mmio_load, &uncacheable_access,
+	                     &load_params),
 };
 
 MAKE_CMD_GROUP(MMIO,
@@ -317,7 +435,9 @@ static const struct cmd_info cacheable_mmio_cmds[] = {
 	MAKE_WB_MMIO_RW_CMD_PAIR(32),
 	MAKE_WB_MMIO_RW_CMD_PAIR(64),
 	MAKE_CMD_WITH_PARAMS(mem_dump, &mmio_dump, &cacheable_access,
-	                     &dump_params)
+	                     &dump_params),
+	MAKE_CMD_WITH_PARAMS(mem_load, &mmio_load, &cacheable_access,
+	                     &load_params),
 };
 
 MAKE_CMD_GROUP(MEM,
