@@ -260,7 +260,7 @@ runon(int argc, const char *argv[], const struct cmd_info *info)
 
 #ifdef ARCH_X86
 MAKE_PREREQ_PARAMS_VAR_ARGS(cpuid_params, 3, 4, "<cpu> <function> [index]", 0);
-#endif /* ARCH_X86 */
+#endif /* #ifdef ARCH_X86 */
 
 MAKE_PREREQ_PARAMS_VAR_ARGS(runon_params, 3, INT_MAX, "<cpu> <cmd> [args]", 0);
 
