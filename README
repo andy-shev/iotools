@@ -24,7 +24,3 @@ turns this option on if the STATIC variable has not been assigned.
 
 CROSS_COMPILE - This variable can be set to a path of another gcc. The build
 will use the compiler pointed to by CROSS_COMPILE.
-
-There is a 'rinstall' build target that will scp the iotools binary to a remote
-system defined by the RHOST variable. RUSER can be defined to login with RUSER
-to perform the copy. If RUSER is not defined, RUSER defaults to 'root.'

@@ -51,15 +51,5 @@ install: $(BINARY)
 	cp -a $^ $(SBINDIR)
 	$(SBINDIR)/$(BINARY) --make-links
 
-RUSER ?= root
-RHOST ?=
-rinstall: $(BINARY)
-	@if [ -n "$(RHOST)" ]; then \
-		scp $^ $(RUSER)@$(RHOST):$(SBINDIR); \
-		ssh $(RUSER)@$(RHOST) $(SBINDIR)/$(BINARY) --make-links; \
-	else \
-		echo $@: no RHOST defined; \
-	fi
-
 clean:
 	$(RM) *.o $(BINARY)
