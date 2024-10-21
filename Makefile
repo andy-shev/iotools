@@ -49,7 +49,7 @@ $(BINARY): $(OBJS) iotools.o Makefile
 
 install: $(BINARY)
 	cp -a $^ $(SBINDIR)
-	$(SBINDIR)/$(BINARY) --make-links
+	$(SBINDIR)/$(BINARY)
 
 clean:
 	$(RM) *.o $(BINARY)
