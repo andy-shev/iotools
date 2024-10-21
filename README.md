@@ -9,22 +9,43 @@ If you ever have to debug hardware, you could probably use these tools.
 
 # Building
 
-*iotools* currently does not use an autoconf script or anything similar to build.
-*iotools* has only been tested to run and build on Linux. Additionally, it is
-assumed that `gcc` is being used to build. In order to build *iotools*, one just
-has to type `make`.
+*iotools* uses CMake[^1] to build, but has only been tested to run and build on
+Linux. Additionally, it is assumed that a `gcc` or `clang` toolchain is being
+used. Building *iotools* is very simple:
 
-There are a few options that can be used during the build.
+```
+cmake .
+make install
+```
 
-* `DEBUG` - If set to 1, debugging symbols will be generated in the binaries. The
-build currently turns this option on if the `DEBUG` variable has not been
-assigned.
+[^1]: https://cmake.org/
 
-* `STATIC` - If set to 1, the binary is linked statically. The build currently
-turns this option on if the `STATIC` variable has not been assigned.
+## Configuration Environment
 
-* `CROSS_COMPILE` - This variable can be set to a path of another gcc. The build
-will use the compiler pointed to by `CROSS_COMPILE`.
+* `CC` - This environment variable, during initial configuration, can be used to
+select a toolchain other than the system default.
+
+## Configuration Options
+
+There are a few options that can be used to configure the build. They can be
+set using any of CMake's configuration mechanisms: command-line (`cmake`),
+ncurses terminal UI (`ccmake`), or graphical UI (`cmake-gui`).
+
+* `CMAKE_BUILD_TYPE` - If set to *Debug*, or unset, debugging symbols will be
+generated in the binary and compiler optimizations are disabled. If set to
+*Release*, only compiler optimizations are enabled.
+
+* `CMAKE_INSTALL_PREFIX` - Defaults to /usr/local.
+
+* `STATIC` - If set to ON (or 1, etc.), the binary is linked statically. This is
+the default.
+
+## Build Environment
+
+* `DESTDIR` - This `make` variable can be used for staged installs[^2].
+
+[^2]: https://www.gnu.org/prep/standards/html_node/DESTDIR.html
+
 
 # Usage
 
