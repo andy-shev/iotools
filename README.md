@@ -37,6 +37,9 @@ generated in the binary and compiler optimizations are disabled. If set to
 
 * `CMAKE_INSTALL_PREFIX` - Defaults to /usr/local.
 
+* `INSTALL_LINKS` - If set to ON (or 1, etc.), command symlinks to the binary
+are created during install. This is the default.
+
 * `STATIC` - If set to ON (or 1, etc.), the binary is linked statically. This is
 the default.
 
