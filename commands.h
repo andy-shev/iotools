@@ -20,6 +20,7 @@
 #define _COMMANDS_H_
 
 #include <stdint.h>
+#include "config.h"
 
 /* This is a shared data type to handle different type sizes for subcommands. */
 typedef union {
@@ -107,6 +108,7 @@ struct cmd_group
 
 struct cmd_info
 {
+	const char *tag;
 	const char *name;
 	int (*entry)(int argc, const char *argv[], const struct cmd_info *info);
 	const void *privdata;
@@ -116,6 +118,7 @@ struct cmd_info
 
 #define _MAKE_CMD(name_, entry_point_, priv_data_, params_, size_data_) \
 	{ \
+		.tag = CMD_PREFIX #name_, \
 		.name = #name_, \
 		.entry = entry_point_, \
 		.privdata = priv_data_, \
