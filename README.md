@@ -25,3 +25,26 @@ turns this option on if the `STATIC` variable has not been assigned.
 
 * `CROSS_COMPILE` - This variable can be set to a path of another gcc. The build
 will use the compiler pointed to by `CROSS_COMPILE`.
+
+# Usage
+
+Depending on environmental constraints, any of the commands provided by
+*iotools* can be accessed either implicitly using the installed symlinks or
+explicitly through the `iotools` binary.
+
+## Help Output
+
+```
+Usage: iotools COMMAND [ARGUMENTS]
+   or: iotools OPTION
+   or: COMMAND [ARGUMENTS]
+
+OPTIONS:
+    --make-links        create command symlinks and exit
+    --list-cmds         list available commands and exit
+    --help              print this message and exit
+    -v, --version       print version and exit
+
+COMMANDS:
+    See output of --list-cmds
+```
