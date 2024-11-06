@@ -1,0 +1,33 @@
+#!/bin/sh
+
+IOTOOLS_PATH=$1
+DESTDIR=$2
+
+if [ -z "${IOTOOLS_PATH}" ] || [ ! -x "${IOTOOLS_PATH}" ]; then
+	echo "Usage: [RUSER=] RHOST= $0 IOTOOLS_PATH [DESTDIR]" > /dev/stderr
+	exit 1
+fi
+
+if [ -z "${RHOST}" ]; then
+	echo $0: no RHOST defined > /dev/stderr
+	exit 2
+fi
+
+if [ -z "${DESTDIR}" ]; then
+	DESTDIR=/usr/local/sbin
+fi
+
+if [ -z "${RUSER}" ]; then
+	RUSER=root
+fi
+
+IOTOOLS_NAME=$(basename ${IOTOOLS_PATH})
+REMOTE_PATH=${DESTDIR}/${IOTOOLS_NAME}
+TARGET=${RUSER}@${RHOST}
+
+scp ${IOTOOLS_PATH} ${TARGET}:${REMOTE_PATH}
+if [ $? -ne 0 ]; then
+	echo $0: Copy to ${TARGET} failed > /dev/stderr
+	exit 3
+fi
+ssh ${TARGET} ${REMOTE_PATH} --make-links
