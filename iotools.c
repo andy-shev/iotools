@@ -32,12 +32,16 @@ main(int argc, const char *argv[])
 static void
 usage(const char *bin_name, FILE *fstream)
 {
-	fprintf(fstream, "usage: %s COMMAND\n", bin_name);
-	fprintf(fstream, "  COMMANDS:\n"
-			"    --make-links\n"
-			"    --clean-links\n"
-			"    --list-cmds\n"
-			"    -v --version\n");
+	fprintf(fstream, "Usage: %s COMMAND [ARGUMENTS]\n", bin_name);
+	fprintf(fstream, "   or: %s OPTION\n", bin_name);
+	fprintf(fstream, "   or: COMMAND [ARGUMENTS]\n"
+			"\nOPTIONS:\n"
+			"    --make-links\tcreate command symlinks and exit\n"
+			"    --list-cmds\t\tlist available commands and exit\n"
+			"    --help\t\tprint this message and exit\n"
+			"    -v, --version\tprint version and exit\n"
+			"\nCOMMANDS:\n"
+			"    See output of --list-cmds\n");
 }
 
 static void

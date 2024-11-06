@@ -15,7 +15,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 VER_MAJOR = 1
-VER_MINOR = 6
+VER_MINOR = 8
 
 CC=$(CROSS_COMPILE)gcc
 
@@ -50,16 +50,6 @@ $(BINARY): $(OBJS) iotools.o Makefile
 install: $(BINARY)
 	cp -a $^ $(SBINDIR)
 	$(SBINDIR)/$(BINARY) --make-links
-
-RUSER ?= root
-RHOST ?=
-rinstall: $(BINARY)
-	@if [ -n "$(RHOST)" ]; then \
-		scp $^ $(RUSER)@$(RHOST):$(SBINDIR); \
-		ssh $(RUSER)@$(RHOST) $(SBINDIR)/$(BINARY) --make-links; \
-	else \
-		echo $@: no RHOST defined; \
-	fi
 
 clean:
 	$(RM) *.o $(BINARY)
