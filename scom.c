@@ -21,7 +21,7 @@
 /*
  * Quick POWER CPU SCOM register access, requires linux SCOM debugfs support.
  */
-#define _FILE_OFFSET_BITS 64
+#define _LARGEFILE64_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -65,7 +65,7 @@ open_and_seek(int chip, uint64_t scom, int mode, int *fd)
 		return -1;
 	}
 
-	if (lseek64(*fd, offset, SEEK_SET) == (off_t)-1) {
+	if (lseek64(*fd, offset, SEEK_SET) == (off64_t)-1) {
 		fprintf(stderr, "lseek(%jd): %s\n", offset, strerror(errno));
 		close(*fd);
 		return -1;
