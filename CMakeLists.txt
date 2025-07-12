@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 
-# Enable -rdynamic link flag only if ENABLE_EXPORTS is True
-cmake_policy(SET CMP0065 NEW)
-
 project(iotools
 	VERSION 1.8
 	LANGUAGES C)
