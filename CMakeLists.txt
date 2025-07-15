@@ -21,6 +21,7 @@ file(GLOB SRCS *.c)
 
 set(COMMAND_PREFIX CMD:)
 configure_file(config.h.in config.h)
+include_directories(BEFORE ${PROJECT_BINARY_DIR})
 
 add_executable(iotools ${SRCS})
 if ($<CONFIG:Debug)

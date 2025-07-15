@@ -11,14 +11,23 @@ If you ever have to debug hardware, you could probably use these tools.
 
 *iotools* uses CMake[^1] to build, but has only been tested to run and build on
 Linux. Additionally, it is assumed that a `gcc` or `clang` toolchain is being
-used. Building *iotools* is very simple:
+used. Building *iotools* is very simple, as shown below.
+
+[^1]: https://cmake.org/
+
+## In-Tree Build
 
 ```
 cmake .
 make install
 ```
 
-[^1]: https://cmake.org/
+## Out-of-Tree Build
+
+```
+cmake -B /build/output/path .
+make -C /build/output/path install
+```
 
 ## Configuration Environment
 
