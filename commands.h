@@ -56,8 +56,8 @@ EXTERN_SIZE_PARAM(64);
 /* The min and max args need to include the argv[0] parameter. For example,
  * 'shl 1 3' would list the min and max arguments as 3. */
 struct prereq_params {
-	int min_args;      /* Miniumum number of arguments required. */
-	int max_args;      /* Maxiumum number of arguments required. */
+	int min_args;      /* Minimum number of arguments required. */
+	int max_args;      /* Maximum number of arguments required. */
 	const char *usage; /* Usage string - requires 1st param %s for arv[0] */
 	int iopl_needed;   /* non-zero if iopl needed. */
 };
@@ -85,7 +85,7 @@ struct cmd_group
 	const struct cmd_info *commands;
 	const int num_commands;
 	/* Pointer to next group of commands. It is used internally to keep
-	 * track of command groups. Command group implemenations should not set
+	 * track of command groups. Command group implementations should not set
 	 * this field. */
 	struct cmd_group *next;
 };

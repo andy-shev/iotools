@@ -267,7 +267,7 @@ print_read_data(int size, int read_block_size, SMBUS_DTYPE *data) {
 }
 
 /* smbus_prologue is responsible for doing the common bits for both smbus read
- * and write. It will parse the comand line arguments and open the appropriate
+ * and write. It will parse the command line arguments and open the appropriate
  * i2c device. It returns 1 on success, 0 on failure. */
 static int
 smbus_prologue(const char *argv[], struct smbus_op_params *params,
