@@ -24,9 +24,7 @@ configure_file(config.h.in config.h)
 include_directories(BEFORE ${PROJECT_BINARY_DIR})
 
 add_executable(iotools ${SRCS})
-if ($<CONFIG:Debug)
-	target_compile_options(iotools PRIVATE -Wall -Werror)
-endif()
+target_compile_options(iotools PRIVATE $<$<CONFIG:Debug>:-Wall -Werror>)
 
 if (STATIC)
 	set_target_properties(iotools PROPERTIES LINK_FLAGS -static)
