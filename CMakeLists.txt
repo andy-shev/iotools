@@ -56,6 +56,6 @@ if (INSTALL_LINKS)
 			endforeach(cmdtag)
 		endfunction(make_links)
 
-		make_links(\$ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/sbin ${PROJECT_BINARY_DIR}/iotools)
+		make_links(\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/sbin $<TARGET_FILE:iotools>)
 	")
 endif()
