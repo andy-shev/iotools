@@ -17,12 +17,22 @@ set(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb")
 # Override implicit "-O3 -DNDEBUG"
 set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
 
-file(GLOB SRCS *.c)
-
 set(COMMAND_PREFIX CMD:)
 configure_file(config.h.in config.h)
 
-add_executable(iotools ${SRCS})
+add_executable(iotools
+	cmos_rw.c
+	commands.c
+	io_rw.c
+	iotools.c
+	logic.c
+	misc.c
+	mmio_rw.c
+	msr.c
+	pci_rw.c
+	scom.c
+	smbus_rw.c
+)
 
 target_include_directories(iotools BEFORE PRIVATE ${PROJECT_BINARY_DIR})
 target_compile_definitions(iotools PRIVATE _GNU_SOURCE)
