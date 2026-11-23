@@ -38,6 +38,10 @@ install(TARGETS iotools DESTINATION sbin)
 # compatible manner: the command names are read from the binary with the
 # (cross) toolchain's readelf instead of executing it.
 if (INSTALL_LINKS)
+	if (NOT CMAKE_READELF)
+		message(FATAL_ERROR "INSTALL_LINKS requires readelf, but CMAKE_READELF is not set")
+	endif()
+
 	# Configure-time values for the install script; everything else is
 	# evaluated at install time so `cmake --install --prefix` and DESTDIR work.
 	install(CODE "
