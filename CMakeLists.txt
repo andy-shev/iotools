@@ -21,16 +21,16 @@ file(GLOB SRCS *.c)
 
 set(COMMAND_PREFIX CMD:)
 configure_file(config.h.in config.h)
-include_directories(BEFORE ${PROJECT_BINARY_DIR})
 
 add_executable(iotools ${SRCS})
+
+target_include_directories(iotools BEFORE PRIVATE ${PROJECT_BINARY_DIR})
+target_compile_definitions(iotools PRIVATE _GNU_SOURCE)
 target_compile_options(iotools PRIVATE $<$<CONFIG:Debug>:-Wall -Werror>)
 
 if (STATIC)
-	set_target_properties(iotools PROPERTIES LINK_FLAGS -static)
+	target_link_options(iotools PRIVATE -static)
 endif()
-
-add_definitions(-D_GNU_SOURCE)
 
 install(TARGETS iotools DESTINATION sbin)
 
