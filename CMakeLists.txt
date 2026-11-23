@@ -35,27 +35,36 @@ add_definitions(-D_GNU_SOURCE)
 install(TARGETS iotools DESTINATION sbin)
 
 # Install symlinks á la `iotools --make-links`, but in a cross-build
-# compatible manner.
+# compatible manner: the command names are read from the binary with the
+# (cross) toolchain's readelf instead of executing it.
 if (INSTALL_LINKS)
-	install(CODE "\
-		function(make_links install_dir bin)
-			execute_process(
-				COMMAND ${CMAKE_READELF} --string-dump .rodata \${bin}
-				OUTPUT_VARIABLE rodata)
-
-			# Gather list of tagged commands
-			string(REGEX MATCHALL \"${COMMAND_PREFIX}[0-9a-z_]+\" cmdlist \${rodata})
-
-			foreach(cmdtag IN LISTS cmdlist)
-				# Drop tagging prefix
-				string(REPLACE ${COMMAND_PREFIX} \"\" cmdname \${cmdtag})
-				message(STATUS \"Symlink: \${cmdname} -> iotools\")
-				execute_process(
-					COMMAND ${CMAKE_COMMAND} -E create_symlink
-						iotools \${install_dir}/\${cmdname})
-			endforeach(cmdtag)
-		endfunction(make_links)
-
-		make_links(\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/sbin $<TARGET_FILE:iotools>)
+	# Configure-time values for the install script; everything else is
+	# evaluated at install time so `cmake --install --prefix` and DESTDIR work.
+	install(CODE "
+		set(SAVED_READELF \"${CMAKE_READELF}\")
+		set(SAVED_BINARY \"$<TARGET_FILE:iotools>\")
+		set(SAVED_PREFIX \"${COMMAND_PREFIX}\")
 	")
+	install(CODE [[
+		set(link_dir "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/sbin")
+
+		execute_process(
+			COMMAND "${SAVED_READELF}" --string-dump .rodata "${SAVED_BINARY}"
+			OUTPUT_VARIABLE rodata
+			RESULT_VARIABLE rc)
+		if (NOT rc EQUAL 0)
+			message(FATAL_ERROR "Failed to read command list from ${SAVED_BINARY}")
+		endif()
+
+		# Gather list of tagged commands
+		string(REGEX MATCHALL "${SAVED_PREFIX}[0-9a-z_]+" cmdlist "${rodata}")
+		list(REMOVE_DUPLICATES cmdlist)
+
+		foreach(cmdtag IN LISTS cmdlist)
+			# Drop tagging prefix
+			string(REPLACE "${SAVED_PREFIX}" "" cmdname "${cmdtag}")
+			message(STATUS "Symlink: ${link_dir}/${cmdname} -> iotools")
+			file(CREATE_LINK iotools "${link_dir}/${cmdname}" SYMBOLIC)
+		endforeach()
+	]])
 endif()
