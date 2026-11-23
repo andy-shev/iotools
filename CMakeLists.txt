@@ -6,8 +6,13 @@ project(iotools
 
 include(GNUInstallDirs)
 
-if (NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE Debug)
+# Default to a Debug build for single-config generators, but keep it a
+# regular cache entry so it can be changed from ccmake/cmake-gui.
+get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if (NOT is_multi_config AND NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+		Debug Release RelWithDebInfo MinSizeRel)
 endif()
 
 option(STATIC "Build statically-linked iotools?" ON)
