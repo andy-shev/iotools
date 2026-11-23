@@ -4,6 +4,8 @@ project(iotools
 	VERSION 1.8
 	LANGUAGES C)
 
+include(GNUInstallDirs)
+
 if (NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Debug)
 endif()
@@ -42,7 +44,7 @@ if (STATIC)
 	target_link_options(iotools PRIVATE -static)
 endif()
 
-install(TARGETS iotools DESTINATION sbin)
+install(TARGETS iotools DESTINATION ${CMAKE_INSTALL_SBINDIR})
 
 # Install symlinks á la `iotools --make-links`, but in a cross-build
 # compatible manner: the command names are read from the binary with the
@@ -58,9 +60,14 @@ if (INSTALL_LINKS)
 		set(SAVED_READELF \"${CMAKE_READELF}\")
 		set(SAVED_BINARY \"$<TARGET_FILE:iotools>\")
 		set(SAVED_PREFIX \"${COMMAND_PREFIX}\")
+		set(SAVED_SBINDIR \"${CMAKE_INSTALL_SBINDIR}\")
 	")
 	install(CODE [[
-		set(link_dir "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/sbin")
+		if (IS_ABSOLUTE "${SAVED_SBINDIR}")
+			set(link_dir "$ENV{DESTDIR}${SAVED_SBINDIR}")
+		else()
+			set(link_dir "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${SAVED_SBINDIR}")
+		endif()
 
 		execute_process(
 			COMMAND "${SAVED_READELF}" --string-dump .rodata "${SAVED_BINARY}"
